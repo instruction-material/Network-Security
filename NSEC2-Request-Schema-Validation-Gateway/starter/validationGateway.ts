@@ -1,61 +1,61 @@
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
 export interface BoundaryRequest {
-  method: HttpMethod;
-  path: string;
-  bodySize: number;
-  authenticatedUserId: string | null;
-  payload: Record<string, unknown>;
+    method: HttpMethod;
+    path: string;
+    bodySize: number;
+    authenticatedUserId: string | null;
+    payload: Record<string, unknown>;
 }
 
 export interface ValidationError {
-  field: string;
-  message: string;
+    field: string;
+    message: string;
 }
 
 export interface BoundaryDecision {
-  accepted: boolean;
-  errors: ValidationError[];
+    accepted: boolean;
+    errors: ValidationError[];
 }
 
 const MAX_BODY_SIZE = 8_192;
 const REQUIRED_FIELDS = ["channelId", "message"];
 
 export function validateBoundaryRequest(
-  request: BoundaryRequest,
+    request: BoundaryRequest,
 ): ValidationError[] {
-  const errors: ValidationError[] = [];
+    const errors: ValidationError[] = [];
 
-  if (request.method !== "POST")
-    errors.push({
-      field: "method",
-      message: "Only POST is allowed for this boundary.",
-    });
+    if (request.method !== "POST")
+        errors.push({
+            field: "method",
+            message: "Only POST is allowed for this boundary.",
+        });
 
-  if (request.bodySize > MAX_BODY_SIZE)
-    errors.push({
-      field: "bodySize",
-      message: "Request body exceeds the current limit.",
-    });
+    if (request.bodySize > MAX_BODY_SIZE)
+        errors.push({
+            field: "bodySize",
+            message: "Request body exceeds the current limit.",
+        });
 
-  for (const field of REQUIRED_FIELDS) {
-    if (!(field in request.payload))
-      errors.push({
-        field,
-        message: "TODO: require a more specific schema rule.",
-      });
-  }
+    for (const field of REQUIRED_FIELDS) {
+        if (!(field in request.payload))
+            errors.push({
+                field,
+                message: "TODO: require a more specific schema rule.",
+            });
+    }
 
-  return errors;
+    return errors;
 }
 
 export function buildBoundaryDecision(
-  request: BoundaryRequest,
+    request: BoundaryRequest,
 ): BoundaryDecision {
-  const errors = validateBoundaryRequest(request);
+    const errors = validateBoundaryRequest(request);
 
-  return {
-    accepted: errors.length === 0 && request.authenticatedUserId !== null,
-    errors,
-  };
+    return {
+        accepted: errors.length === 0 && request.authenticatedUserId !== null,
+        errors,
+    };
 }
